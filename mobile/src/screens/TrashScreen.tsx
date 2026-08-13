@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, Button, ActivityIndicator, FlatList, ScrollView, Alert } from "react-native";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { deleteTrashCustomer, deleteTrashTransaction, getTrash } from "../api";
 import { TrashContent } from "../types";
-import { RootStackParamList } from "../App";
+import { MainTabParamList } from "../../App";
 
-type Props = NativeStackScreenProps<RootStackParamList, "Trash">;
+type Props = BottomTabScreenProps<MainTabParamList, "Trash">;
 
 export default function TrashScreen({ navigation }: Props) {
   const [trash, setTrash] = useState<TrashContent | null>(null);

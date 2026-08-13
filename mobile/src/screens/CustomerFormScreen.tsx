@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, TextInput, Button, ActivityIndicator, Alert } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { createCustomer, getCustomerById, updateCustomer } from "../api";
-import { RootStackParamList } from "../App";
+import { RootStackParamList } from "../../App";
 
 type Props = NativeStackScreenProps<RootStackParamList, "CustomerForm">;
 
@@ -45,7 +45,7 @@ export default function CustomerFormScreen({ route, navigation }: Props) {
       } else {
         await createCustomer(payload);
       }
-      navigation.navigate("Customers");
+      navigation.goBack();
     } catch (error) {
       Alert.alert("Error", error instanceof Error ? error.message : "Failed to save customer");
     } finally {

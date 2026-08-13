@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { View, Text, Button, TextInput, ScrollView, Alert } from "react-native";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { exportBackup, restoreBackup } from "../api";
-import { RootStackParamList } from "../App";
+import { MainTabParamList } from "../../App";
 
-type Props = NativeStackScreenProps<RootStackParamList, "Backup">;
+type Props = BottomTabScreenProps<MainTabParamList, "Backup">;
 
 export default function BackupScreen({ navigation }: Props) {
   const [backupText, setBackupText] = useState("{}");

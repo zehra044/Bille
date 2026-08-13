@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, ActivityIndicator, FlatList, Button, ScrollView } from "react-native";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { getDashboardSummary } from "../api";
 import { DashboardSummary } from "../types";
-import { RootStackParamList } from "../App";
+import { MainTabParamList } from "../../App";
 
-type Props = NativeStackScreenProps<RootStackParamList, "Dashboard">;
+type Props = BottomTabScreenProps<MainTabParamList, "Dashboard">;
 
 export default function DashboardScreen({ navigation }: Props) {
   const [dashboard, setDashboard] = useState<DashboardSummary | null>(null);

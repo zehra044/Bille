@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TextInput, Button, ActivityIndicator, FlatList, ScrollView, Alert } from "react-native";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { getDailyCollections, getMonthlyCollections, getOutstandingBalances } from "../api";
 import { CollectionReport, OutstandingBalanceEntry } from "../types";
-import { RootStackParamList } from "../App";
+import { MainTabParamList } from "../../App";
 
-type Props = NativeStackScreenProps<RootStackParamList, "Reports">;
+type Props = BottomTabScreenProps<MainTabParamList, "Reports">;
 
 export default function ReportsScreen({ navigation }: Props) {
   const [outstanding, setOutstanding] = useState<OutstandingBalanceEntry[]>([]);

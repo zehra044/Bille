@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, Pressable, ScrollView, Alert } from "react-native";
+import { View, Text, TextInput, Pressable, ScrollView, Alert, Platform } from "react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { createTransaction } from "../api";
 import { RootStackParamList } from "../../App";
@@ -11,40 +12,71 @@ export default function TransactionFormScreen({ route, navigation }: Props) {
   const { customerId, initialType } = route.params;
   const [type, setType] = useState<"CHARGE" | "PAYMENT" | "ADJUSTMENT">(initialType ?? "CHARGE");
   const [amount, setAmount] = useState("");
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [date, setDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [description, setDescription] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("");
   const [reason, setReason] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit() {
-    if (!amount) {
+    const trimmedAmount = amount.trim();
+    const parsedAmount = Number(trimmedAmount);
+
+    if (!trimmedAmount || !Number.isFinite(parsedAmount)) {
       Alert.alert("Validation", "Amount is required");
       return;
     }
 
-    if (type === "PAYMENT" && !paymentMethod) {
-      Alert.alert("Validation", "Payment method is required for payments");
+    if (parsedAmount <= 0) {
+      Alert.alert("Validation", "Amount must be greater than zero");
       return;
     }
 
-    if (type === "CHARGE" && !description) {
-      Alert.alert("Validation", "Description is recommended for charges");
+    if (type === "CHARGE" && !description.trim()) {
+      Alert.alert("Validation", "A charge description is required");
+      return;
+    }
+
+    if (type === "PAYMENT" && !paymentMethod.trim()) {
+      Alert.alert("Validation", "A payment method is required");
+      return;
+    }
+
+    if (type === "ADJUSTMENT" && !reason.trim()) {
+      Alert.alert("Validation", "An adjustment reason is required");
+      return;
+    }
+
+    if (type === "ADJUSTMENT" && parsedAmount === 0) {
+      Alert.alert("Validation", "Adjustment amount cannot be zero");
       return;
     }
 
     setLoading(true);
     try {
+      const utcDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
       const payload = {
         type,
-        amount: Number(amount),
-        date,
-        description: description || undefined,
-        paymentMethod: paymentMethod || undefined,
-        reason: reason || undefined,
+        amount: parsedAmount,
+        date: utcDate.toISOString().slice(0, 10),
+        description: description.trim() || undefined,
+        paymentMethod: paymentMethod.trim() || undefined,
+        reason: reason.trim() || undefined,
       };
       await createTransaction(customerId, payload);
-      navigation.goBack();
+      const actionLabel = type === "PAYMENT" ? "Payment recorded" : type === "ADJUSTMENT" ? "Adjustment saved" : "Charge added";
+      Alert.alert("Success", `${actionLabel} successfully.`, [
+        {
+          text: "OK",
+          onPress: () => {
+            navigation.navigate("CustomerDetail", {
+              customerId,
+              refreshKey: Date.now(),
+            });
+          },
+        },
+      ]);
     } catch (error) {
       Alert.alert("Error", error instanceof Error ? error.message : "Failed to create transaction");
     } finally {
@@ -71,11 +103,25 @@ export default function TransactionFormScreen({ route, navigation }: Props) {
         onChangeText={setAmount}
       />
       <Text style={[styles.sectionTitle, { marginTop: 20 }]}>Date</Text>
-      <TextInput
-        style={{ backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, borderRadius: 12, padding: 14, marginTop: 8, color: colors.ink }}
-        value={date}
-        onChangeText={setDate}
-      />
+      <Pressable
+        onPress={() => setShowDatePicker(true)}
+        style={{ backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, borderRadius: 12, padding: 14, marginTop: 8 }}
+      >
+        <Text style={{ color: colors.ink, fontSize: 18 }}>{date.toISOString().slice(0, 10)}</Text>
+      </Pressable>
+      {showDatePicker ? (
+        <DateTimePicker
+          value={date}
+          mode="date"
+          display={Platform.OS === "ios" ? "spinner" : "default"}
+          onChange={(_, selectedDate) => {
+            setShowDatePicker(false);
+            if (selectedDate) {
+              setDate(selectedDate);
+            }
+          }}
+        />
+      ) : null}
       {type === "CHARGE" ? (
         <>
           <Text style={[styles.sectionTitle, { marginTop: 20 }]}>What was charged?</Text>

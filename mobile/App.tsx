@@ -20,7 +20,7 @@ import MoreScreen from "./src/screens/MoreScreen";
 
 export type RootStackParamList = {
   MainTabs: NavigatorScreenParams<MainTabParamList> | undefined;
-  CustomerDetail: { customerId: string };
+  CustomerDetail: { customerId: string; refreshKey?: number };
   CustomerForm: { customerId?: string };
   TransactionForm: {
     customerId: string;

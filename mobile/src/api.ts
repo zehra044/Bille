@@ -1,5 +1,27 @@
 const BASE_URL = "http://localhost:5000";
 
+function flattenFieldErrors(errors: unknown): string[] {
+  if (!errors || typeof errors !== "object") return [];
+
+  const values = Object.values(errors as Record<string, unknown>);
+  const flattened: string[] = [];
+
+  for (const value of values) {
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        if (typeof item === "string") flattened.push(item);
+      }
+      continue;
+    }
+
+    if (value && typeof value === "object") {
+      flattened.push(...flattenFieldErrors(value));
+    }
+  }
+
+  return flattened;
+}
+
 async function request(path: string, options: RequestInit = {}) {
   const response = await fetch(`${BASE_URL}${path}`, {
     headers: {
@@ -12,7 +34,9 @@ async function request(path: string, options: RequestInit = {}) {
   const data = text ? JSON.parse(text) : null;
 
   if (!response.ok) {
-    throw new Error(data?.message || `API error ${response.status}`);
+    const errors = flattenFieldErrors(data?.errors);
+    const detail = errors[0] || data?.message || `API error ${response.status}`;
+    throw new Error(detail);
   }
 
   return data;

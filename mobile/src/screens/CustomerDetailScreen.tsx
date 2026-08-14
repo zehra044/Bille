@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   ScrollView,
   Pressable,
+  Share,
 } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
@@ -21,7 +22,7 @@ import { colors, formatMoney, styles } from "../ui";
 type Props = NativeStackScreenProps<RootStackParamList, "CustomerDetail">;
 
 export default function CustomerDetailScreen({ route, navigation }: Props) {
-  const { customerId } = route.params;
+  const { customerId, refreshKey } = route.params;
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [summary, setSummary] = useState<CustomerSummary | null>(null);
@@ -32,7 +33,13 @@ export default function CustomerDetailScreen({ route, navigation }: Props) {
     const unsubscribe = navigation.addListener("focus", fetchData);
     fetchData();
     return unsubscribe;
-  }, [navigation]);
+  }, [navigation, customerId, refreshKey]);
+
+  useEffect(() => {
+    if (typeof refreshKey === "number") {
+      fetchData();
+    }
+  }, [refreshKey]);
 
   async function fetchData() {
     setLoading(true);
@@ -54,6 +61,23 @@ export default function CustomerDetailScreen({ route, navigation }: Props) {
     }
   }
 
+  async function handleShare() {
+    if (!customer || !summary) return;
+
+    const message = [
+      `Customer: ${customer.fullName}`,
+      `Phone: ${customer.phoneNumber}`,
+      `Balance: ${formatMoney(summary.summary.balance)}`,
+      `Charges: ${formatMoney(summary.summary.totalCharges)}`,
+      `Payments: ${formatMoney(summary.summary.totalPayments)}`,
+    ].join("\n");
+
+    await Share.share({
+      title: `Balance for ${customer.fullName}`,
+      message,
+    });
+  }
+
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -73,10 +97,36 @@ export default function CustomerDetailScreen({ route, navigation }: Props) {
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <Text style={styles.eyebrow}>Customer account</Text>
-      <Text style={[styles.title, { marginTop: 4 }]}>{customer.fullName}</Text>
-      <Text style={[styles.subtitle, { marginTop: 5 }]}>
-        {customer.phoneNumber}
-      </Text>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginTop: 4,
+        }}
+      >
+        <View style={{ flex: 1 }}>
+          <Text style={styles.title}>{customer.fullName}</Text>
+          <Text style={[styles.subtitle, { marginTop: 5 }]}>
+            {customer.phoneNumber}
+          </Text>
+        </View>
+
+        <Pressable
+          onPress={handleShare}
+          style={{
+            backgroundColor: colors.surface,
+            borderWidth: 1,
+            borderColor: colors.border,
+            borderRadius: 10,
+            paddingHorizontal: 12,
+            paddingVertical: 8,
+          }}
+        >
+          <Text style={{ color: colors.primary, fontWeight: "700" }}>Share</Text>
+        </Pressable>
+      </View>
+
       {customer.address ? (
         <Text style={[styles.subtitle, { marginTop: 3 }]}>
           {customer.address}

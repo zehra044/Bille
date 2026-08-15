@@ -1,4 +1,12 @@
-const BASE_URL = "http://localhost:5000";
+import { Platform } from "react-native";
+
+declare const process: { env: Record<string, string | undefined> };
+
+const DEFAULT_BASE_URL =
+  Platform.OS === "android" ? "http://10.0.2.2:5000" : "http://localhost:5000";
+
+const BASE_URL =
+  process.env.EXPO_PUBLIC_API_URL || DEFAULT_BASE_URL;
 
 function flattenFieldErrors(errors: unknown): string[] {
   if (!errors || typeof errors !== "object") return [];

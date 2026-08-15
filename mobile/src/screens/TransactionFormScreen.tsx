@@ -85,6 +85,10 @@ export default function TransactionFormScreen({ route, navigation }: Props) {
   }
 
   const isPayment = type === "PAYMENT";
+  const localDate = (d: Date) => {
+    const shifted = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+    return shifted.toISOString().slice(0, 10);
+  };
   const title = isPayment ? "Record payment" : type === "CHARGE" ? "Add charge" : "Adjustment";
 
   return (
@@ -107,7 +111,7 @@ export default function TransactionFormScreen({ route, navigation }: Props) {
         onPress={() => setShowDatePicker(true)}
         style={{ backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, borderRadius: 12, padding: 14, marginTop: 8 }}
       >
-        <Text style={{ color: colors.ink, fontSize: 18 }}>{date.toISOString().slice(0, 10)}</Text>
+        <Text style={{ color: colors.ink, fontSize: 18 }}>{localDate(date)}</Text>
       </Pressable>
       {showDatePicker ? (
         <DateTimePicker

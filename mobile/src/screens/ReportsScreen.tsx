@@ -9,10 +9,14 @@ type Props = BottomTabScreenProps<MainTabParamList, "Reports">;
 
 export default function ReportsScreen({ navigation }: Props) {
   const [outstanding, setOutstanding] = useState<OutstandingBalanceEntry[]>([]);
-  const [dailyDate, setDailyDate] = useState(new Date().toISOString().slice(0, 10));
+  const [dailyDate, setDailyDate] = useState(() => {
+    const now = new Date();
+    const shifted = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+    return shifted.toISOString().slice(0, 10);
+  });
   const [dailyReport, setDailyReport] = useState<CollectionReport | null>(null);
-  const [monthlyYear, setMonthlyYear] = useState(new Date().getUTCFullYear().toString());
-  const [monthlyMonth, setMonthlyMonth] = useState((new Date().getUTCMonth() + 1).toString());
+  const [monthlyYear, setMonthlyYear] = useState(new Date().getFullYear().toString());
+  const [monthlyMonth, setMonthlyMonth] = useState((new Date().getMonth() + 1).toString());
   const [monthlyReport, setMonthlyReport] = useState<CollectionReport | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

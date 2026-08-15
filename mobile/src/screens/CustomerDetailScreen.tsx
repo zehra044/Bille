@@ -35,12 +35,6 @@ export default function CustomerDetailScreen({ route, navigation }: Props) {
     return unsubscribe;
   }, [navigation, customerId, refreshKey]);
 
-  useEffect(() => {
-    if (typeof refreshKey === "number") {
-      fetchData();
-    }
-  }, [refreshKey]);
-
   async function fetchData() {
     setLoading(true);
     setError(null);
